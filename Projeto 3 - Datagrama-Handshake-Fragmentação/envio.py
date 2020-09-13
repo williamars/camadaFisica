@@ -101,7 +101,7 @@ def main():
         print("Comunicação de Envio aberta!\n")
         
         #txBuffer = imagem em bytes!
-        image = './img/image.png'
+        image = './img/teste1.png'
 
         txBuffer =  open(image, 'rb').read()
         print("Imagem transformada com sucesso!\n")
@@ -145,7 +145,7 @@ def main():
         index_data2 = index_data1 + size_payload
         number_package = 1
         while not send_all_packages:
-            time.sleep(2)
+            time.sleep(0.01)
             print("Enviando o pacote {}...".format(number_package))
             if number_package == packages:
                 last = True
@@ -155,18 +155,31 @@ def main():
                 header = define_header(3, number_package, packages, size_payload)
                 com.sendData(header + data + eop_data)
                 time.sleep(0.1)
-                print("Enviei o pacote {0} com header {1}\n".format(number_package, header))
 
             else:
                 data = txBuffer[index_data1 : index_data1+last_payload]
                 header = define_header(3, number_package, packages, last_payload)
                 com.sendData(header + data + eop_data)
                 time.sleep(0.1)
-                print("Enviei o último pacote, com header {}\.".format(header))
                 send_all_packages = True
-     
-            index_data1 += size_payload
-            number_package += 1
+
+            print("Enviei o pacote {}. Agora vou esperar". format(number_package))
+            ans_head = com.rx.getNData(size_header)
+            ans_payload = com.rx.getNData(0)
+            ans_eop = com.rx.getNData(size_end_of_package)
+
+            if see_error(ans_head, ans_eop):
+                print("Deu erro no EOP")
+            
+            else:
+                if transform_to_int(ans_head[4:5]) == 0:
+                    print("Hm, houve um erro. Vou enviar o pacote novamente")
+                    number_package = transform_to_int(ans_head[5:6])
+
+                else:
+                    print("Enviou certo. Próximo\n")
+                    index_data1 += size_payload
+                    number_package += 1
     
         # Encerra comunicação
         print("-------------------------")

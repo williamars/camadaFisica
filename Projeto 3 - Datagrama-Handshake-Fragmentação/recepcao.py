@@ -45,14 +45,35 @@ def see_error(header, eop):
         error = True
 
     return error
-    
-def send_something(type_):
+
+def define_header(type_, package_actual, packages, size_payload):
+
+    tipo = transform_to_bytes(type_)
+    package_actual = transform_to_bytes(package_actual)
+    number = transform_to_bytes(packages)
+    zero = transform_to_bytes(0)
+
+    if type_ == 4:
+        header = tipo + zero*3 + number + package_actual + zero*4
+        print(header[4:5])
+        
+    else:
+        size = transform_to_bytes(size_payload)
+        header = tipo + package_actual + number + size + zero*6
+
+    return header
+
+def send_something(type_, package, error):
     eop = EOP()
     # Tipo de confirmação Handshake
     if type_ == 2:
         header = header_confirm_Handshake()
-        payload = ''
         return header + eop
+
+    elif type_ == 4:
+        header = define_header(type_, package, error, 0)
+        return header + eop
+
 
 def main():
     try:
@@ -81,14 +102,15 @@ def main():
                         qtde_packages = transform_to_int(header[2:3])
                         print("A quantidade de pacotes que receberei será {}".format(qtde_packages))
                         print("Está tudo certo, vou enviar a resposta do handshake!")
-                        print(send_something(2))
+                        print(send_something(2, 0, 0))
                         time.sleep(0.5)
-                        com.sendData(send_something(2))
+                        com.sendData(send_something(2, 0, 0))
                         handshakeCame = True
 
             contador_package = 0
             while not getAllPackages:
-                print("Agora, vou aguardar os pacotes!")
+
+                print("Agora, vou aguardar o pacote {} ". format(contador_package+1))
                 # Comunicação dos pacotes
                 header = com.rx.getNData(size_header)
                 type_message = transform_to_int(header[0:1])
@@ -98,26 +120,42 @@ def main():
                 print(type_message)
                 print(actual_package)
                 print(size_payload)
+                time.sleep(2)
+                
+                payload = com.rx.getNData(size_payload) 
+                print('esperando 2s...')
+                time.sleep(2)
+                print(contador_package)
 
                 if actual_package == (contador_package+1):
                     if type_message == 3:
-                        payload = com.rx.getNData(size_payload)
+                        print("bla")
                         time.sleep(0.1)
-                        all_payloads += payload
-
                         eop = com.rx.getNData(size_end_of_package)
                         if see_error(header, eop):
                             print("Há um erro no header ou no EOP")
                             #Mandar uma mensagem avisando que deu errado, envia novamente, espera receber novamiente
+                        all_payloads += payload
 
                         if actual_package == qtde_packages:
                             print("deu")
                             getAllPackages = True
                             finish = True
                         
-                        contador_package = actual_package
+                        contador_package += 1
+
+                    print("Vou enviar a confirmação para o Client")
+                    com.sendData(send_something(4, contador_package, 1))
+                    time.sleep(0.1)
+
                 else:
                     print("Deu erro nos pacotes. Por favor, mandar de novo o {}". format(contador_package))
+                    com.sendData(send_something(4, contador_package, 0))
+                    time.sleep(0.1)
+
+                    '''
+                        preciso definir um header: 4, 0, 0, 0, 0(important), contador_package, 0, 0, 0, 0
+                    '''
 
         # print(all_payloads)
 
