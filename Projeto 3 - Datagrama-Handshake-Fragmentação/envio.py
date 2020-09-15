@@ -77,6 +77,7 @@ def see_error(header, eop):
 def EOP():
     zero = transform_to_bytes(0)
     eop = zero * size_end_of_package
+    # b'\x00\x00\x00\x00'
     return eop
 
 def define_header(type_, package_actual, packages, size_payload):
@@ -123,12 +124,27 @@ def main():
             # tempo2 = time.time() -> tem que fazer algo com o tempo que não consegui (5 segundos)
 
             # 1º envio: HANDSHAKE
+            print("Para começar, vou enviar o Handshake!")
             hand_header = headerHandshake(packages)
             com.sendData(hand_header + eop_data)
             time.sleep(0.1)
 
             # Aguardando a confirmação do cliente
+            #while
             confirmation_header_handshake = com.rx.getNData(size_header)
+            while confirmation_header_handshake == b'\x00':
+                try_again = input("Servidor inativo. Tentar novamente? S/N: ")
+                if try_again == "S":
+                    print("Ok, vamos tentar novamente. Enviando handshake...\n")
+                    hand_header = headerHandshake(packages)
+                    com.sendData(hand_header + eop_data)
+                    time.sleep(0.1)
+                    confirmation_header_handshake = com.rx.getNData(size_header)
+                else:
+                    print("Ok, finalizando comunicação.")
+                    com.disable()
+                    exit()
+
             confirmation_eop_handshake = com.rx.getNData(size_end_of_package)
 
             if see_error(confirmation_header_handshake, confirmation_eop_handshake):
@@ -147,11 +163,12 @@ def main():
         while not send_all_packages:
             time.sleep(0.01)
             print("Enviando o pacote {}...".format(number_package))
+            time.sleep(2)
             if number_package == packages:
                 last = True
 
             if not last:
-                data = txBuffer[index_data1 : index_data2]
+                data = txBuffer[index_data1 : index_data1+size_payload]
                 header = define_header(3, number_package, packages, size_payload)
                 com.sendData(header + data + eop_data)
                 time.sleep(0.1)
@@ -165,16 +182,21 @@ def main():
 
             print("Enviei o pacote {}. Agora vou esperar". format(number_package))
             ans_head = com.rx.getNData(size_header)
+            while ans_head == b'\x00':
+                ans_head = com.rx.getNData(size_header)
             ans_payload = com.rx.getNData(0)
             ans_eop = com.rx.getNData(size_end_of_package)
 
             if see_error(ans_head, ans_eop):
+                print(ans_head)
+                print(ans_eop)
                 print("Deu erro no EOP")
             
             else:
                 if transform_to_int(ans_head[4:5]) == 0:
                     print("Hm, houve um erro. Vou enviar o pacote novamente")
-                    number_package = transform_to_int(ans_head[5:6])
+                    new = transform_to_int(ans_head[5:6])
+                    number_package = new
 
                 else:
                     print("Enviou certo. Próximo\n")
@@ -186,8 +208,9 @@ def main():
         print("Comunicação encerrada")
         print("-------------------------")
         com.disable()
-    except:
-        print("ops! :-\\")
+    except Exception as ex:
+        print(ex)
+        print("bye! ;)")
         com.disable()
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda

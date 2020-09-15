@@ -27,6 +27,7 @@ def header_confirm_Handshake():
     type_ = transform_to_bytes(2)
     zero = transform_to_bytes(0)
     header = type_ + zero * 9
+    # b'\x02\x00\x00\x00...
     return header
 
 def EOP():
@@ -55,7 +56,6 @@ def define_header(type_, package_actual, packages, size_payload):
 
     if type_ == 4:
         header = tipo + zero*3 + number + package_actual + zero*4
-        print(header[4:5])
         
     else:
         size = transform_to_bytes(size_payload)
@@ -101,13 +101,13 @@ def main():
                     else:
                         qtde_packages = transform_to_int(header[2:3])
                         print("A quantidade de pacotes que receberei será {}".format(qtde_packages))
-                        print("Está tudo certo, vou enviar a resposta do handshake!")
-                        print(send_something(2, 0, 0))
+                        print("Está tudo certo, vou enviar a resposta do handshake!\n")
                         time.sleep(0.5)
                         com.sendData(send_something(2, 0, 0))
                         handshakeCame = True
 
             contador_package = 0
+            tamanho_payload = 0
             while not getAllPackages:
 
                 print("Agora, vou aguardar o pacote {} ". format(contador_package+1))
@@ -117,45 +117,38 @@ def main():
                 actual_package = transform_to_int(header[1:2])
                 size_payload = transform_to_int(header[3:4])
 
-                print(type_message)
-                print(actual_package)
-                print(size_payload)
-                time.sleep(2)
+                print("Esperando 1 segundo...\n")
+                time.sleep(1)
                 
-                payload = com.rx.getNData(size_payload) 
-                print('esperando 2s...')
-                time.sleep(2)
-                print(contador_package)
 
                 if actual_package == (contador_package+1):
                     if type_message == 3:
-                        print("bla")
+                        payload = com.rx.getNData(size_payload)
                         time.sleep(0.1)
                         eop = com.rx.getNData(size_end_of_package)
                         if see_error(header, eop):
                             print("Há um erro no header ou no EOP")
                             #Mandar uma mensagem avisando que deu errado, envia novamente, espera receber novamiente
                         all_payloads += payload
+                        tamanho_payload = len(all_payloads)
 
                         if actual_package == qtde_packages:
-                            print("deu")
+                            print("\nEnviou todos. Finalizando comunicação!")
                             getAllPackages = True
                             finish = True
                         
                         contador_package += 1
 
-                    print("Vou enviar a confirmação para o Client")
+                    print("Recebi o pacote {}. Vou enviar a confirmação para o Client\n".format(actual_package))
                     com.sendData(send_something(4, contador_package, 1))
                     time.sleep(0.1)
 
                 else:
-                    print("Deu erro nos pacotes. Por favor, mandar de novo o {}". format(contador_package))
-                    com.sendData(send_something(4, contador_package, 0))
+                    print(tamanho_payload/114)
+                    print("Deu erro nos pacotes. Esse não era o próximo. Por favor, mandar de novo o {}". format((tamanho_payload/114)+1))
+                    print(send_something(4, (tamanho_payload/114)+1, 0))
+                    com.sendData(send_something(4, (tamanho_payload/114)+1, 0))
                     time.sleep(0.1)
-
-                    '''
-                        preciso definir um header: 4, 0, 0, 0, 0(important), contador_package, 0, 0, 0, 0
-                    '''
 
         # print(all_payloads)
 
@@ -172,8 +165,8 @@ def main():
         print("Comunicação encerrada")
         print("-------------------------")
         com.disable()
-    except:
-        print("ops! :-\\")
+    except Exception as ex:
+        print(ex)
         com.disable()
 
 # Só roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
