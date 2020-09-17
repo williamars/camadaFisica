@@ -120,13 +120,16 @@ def main():
                 actual_package = transform_to_int(header[1:2])
                 size_payload = transform_to_int(header[3:4])
 
+                # print(header)
+
+                payload = com.rx.getNData(size_payload)
+                eop = com.rx.getNData(size_end_of_package)
                 print("Esperando 1 segundo...\n")
                 time.sleep(1)
                 
                 bla = False
                 if actual_package == (contador_package+1):
                     if type_message == 3:
-                        payload = com.rx.getNData(size_payload)
                         time.sleep(0.1)
                         eop = com.rx.getNData(size_end_of_package)
                         # print(payload)
@@ -155,6 +158,12 @@ def main():
                         com.sendData(send_something(4, contador_package, 0))
                         time.sleep(0.1)
 
+                    if actual_package == qtde_packages:
+                            print("\nEnviou todos. Finalizando comunicação!")
+                            getAllPackages = True
+                            finish = True
+
+                    contador_package += 1
                 else:
                     print(tamanho_payload/114)
                     print("Deu erro nos pacotes. Esse não era o próximo. Por favor, mandar de novo o {}". format((tamanho_payload/114)+1))

@@ -26,6 +26,7 @@ HEADER:
 
 from enlace import *
 import time
+import random
 
 import os
 from tkinter import Tk
@@ -92,6 +93,7 @@ def define_header(type_, package_actual, packages, size_payload):
     zero = transform_to_bytes(0)
 
     header = tipo + package_actual + number + size + zero*6
+    # print("\n o header que enviarei é:", header)
 
     return header
 
@@ -126,9 +128,7 @@ def main():
         eop_data = EOP()
         init_completed = False
 
-        # tempo = time.time()
         while not init_completed:
-            # tempo2 = time.time() -> tem que fazer algo com o tempo que não consegui (5 segundos)
 
             # 1º envio: HANDSHAKE
             print("Para começar, vou enviar o Handshake!")
@@ -137,7 +137,6 @@ def main():
             time.sleep(0.1)
 
             # Aguardando a confirmação do cliente
-            #while
             confirmation_header_handshake = com.rx.getNData(size_header)
             while confirmation_header_handshake == b'\x00':
                 try_again = input("Servidor inativo. Tentar novamente? S/N: ")
@@ -162,14 +161,15 @@ def main():
                     print("Server autorizou. Começar a transmissão!")
                     init_completed = True
         
+        last_again = False
         send_all_packages = False
         last = False
         index_data1 = 0
-        index_data2 = index_data1 + size_payload
         number_package = 1
         while not send_all_packages:
+            # print(index_data1)
             time.sleep(0.01)
-            print("Enviando o pacote {}...".format(number_package))
+            print("Enviando o pacote {}...\n".format(number_package))
             time.sleep(2)
             if number_package == packages:
                 last = True
@@ -198,13 +198,25 @@ def main():
                 ans_payload = com.rx.getNData(0)
                 ans_eop = com.rx.getNData(size_end_of_package)
 
-
-            print("Enviei o pacote {}. Agora vou esperar". format(number_package))
-            ans_head = com.rx.getNData(size_header)
-            while ans_head == b'\x00':
+                print("Enviei o último pacote {}. Agora vou esperar". format(number_package))
                 ans_head = com.rx.getNData(size_header)
-            ans_payload = com.rx.getNData(0)
-            ans_eop = com.rx.getNData(size_end_of_package)
+                while ans_head == b'\x00':
+                    ans_head = com.rx.getNData(size_header)
+                ans_payload = com.rx.getNData(0)
+                ans_eop = com.rx.getNData(size_end_of_package)
+
+                if transform_to_int(ans_head[4:5]) == 0:
+                    last_again = True
+                else:
+                    send_all_packages = True
+
+            print("Enviei o pacote {}. Agora vou esperar\n". format(number_package))
+            if last_again == False:
+                ans_head = com.rx.getNData(size_header)
+                while ans_head == b'\x00':
+                    ans_head = com.rx.getNData(size_header)
+                ans_payload = com.rx.getNData(0)
+                ans_eop = com.rx.getNData(size_end_of_package)
 
             if see_error(ans_head, ans_eop):
                 print(ans_head)
@@ -212,7 +224,9 @@ def main():
                 print("Deu erro no EOP")
             
             else:
-                if transform_to_int(ans_head[4:5]) == 0:
+                # print("header: ", ans_head)
+                # print("eop: ", ans_eop)
+                if transform_to_int(ans_head[4:5]) == 1:
                     print("Hm, houve um erro. Vou enviar o pacote novamente")
                     new = transform_to_int(ans_head[5:6])
                     number_package = new+1
