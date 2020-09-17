@@ -27,6 +27,10 @@ HEADER:
 from enlace import *
 import time
 
+import os
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
+
 #   python -m serial.tools.list_ports
 serialName = "COM3"                  # Windows(variacao de)
 
@@ -101,8 +105,11 @@ def main():
 
         print("Comunicação de Envio aberta!\n")
         
+        Tk().withdraw()
+        image = askopenfilename() 
+
         #txBuffer = imagem em bytes!
-        image = './img/teste1.png'
+        # image = './img/teste1.png'
 
         txBuffer =  open(image, 'rb').read()
         print("Imagem transformada com sucesso!\n")
