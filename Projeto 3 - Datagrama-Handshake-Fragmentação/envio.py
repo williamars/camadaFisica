@@ -96,8 +96,8 @@ def define_header(type_, package_actual, packages, size_payload):
     return header
 
 
-
 def main():
+    one = False
     try:
         com = enlace(serialName)
     
@@ -182,10 +182,22 @@ def main():
 
             else:
                 data = txBuffer[index_data1 : index_data1+last_payload]
-                header = define_header(3, number_package, packages, last_payload)
-                com.sendData(header + data + eop_data)
+                header = define_header(3, number_package, packages, last_payload)     
+                if not one:  
+                    com.sendData(header + data + b'\xFF' + eop_data)
+                    one = True
+                else: 
+                    com.sendData(header + data + eop_data)
+                    if transform_to_int(ans_head[4:5]) == 1:
+                        send_all_packages = True
                 time.sleep(0.1)
-                send_all_packages = True
+
+                ans_head = com.rx.getNData(size_header)
+                while ans_head == b'\x00':
+                    ans_head = com.rx.getNData(size_header)
+                ans_payload = com.rx.getNData(0)
+                ans_eop = com.rx.getNData(size_end_of_package)
+
 
             print("Enviei o pacote {}. Agora vou esperar". format(number_package))
             ans_head = com.rx.getNData(size_header)
@@ -203,12 +215,16 @@ def main():
                 if transform_to_int(ans_head[4:5]) == 0:
                     print("Hm, houve um erro. Vou enviar o pacote novamente")
                     new = transform_to_int(ans_head[5:6])
-                    number_package = new
+                    number_package = new+1
+                    if number_package == 3:
+                        number_package -= 1
+                    print(number_package)
 
                 else:
                     print("Enviou certo. Próximo\n")
                     index_data1 += size_payload
-                    number_package += 1
+                    new = transform_to_int(ans_head[5:6])
+                    number_package = new + 1
     
         # Encerra comunicação
         print("-------------------------")

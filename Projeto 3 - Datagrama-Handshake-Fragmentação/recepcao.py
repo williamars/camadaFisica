@@ -44,6 +44,9 @@ def see_error(header, eop):
     if len(eop) != size_end_of_package:
         print("Há um erro no tamanho do EOP")
         error = True
+    if eop != b'\x00\x00\x00\x00':
+        print("O tamanho do payload está errado. Por favor, envie novamente")
+        error = True
 
     return error
 
@@ -120,33 +123,42 @@ def main():
                 print("Esperando 1 segundo...\n")
                 time.sleep(1)
                 
-
+                bla = False
                 if actual_package == (contador_package+1):
                     if type_message == 3:
                         payload = com.rx.getNData(size_payload)
                         time.sleep(0.1)
                         eop = com.rx.getNData(size_end_of_package)
+                        # print(payload)
+                        # print(eop)
                         if see_error(header, eop):
                             print("Há um erro no header ou no EOP")
+                            bla = True
                             #Mandar uma mensagem avisando que deu errado, envia novamente, espera receber novamiente
-                        all_payloads += payload
-                        tamanho_payload = len(all_payloads)
+                        else:
+                            all_payloads += payload
+                            print(all_payloads)
+                            tamanho_payload = len(all_payloads)
 
-                        if actual_package == qtde_packages:
-                            print("\nEnviou todos. Finalizando comunicação!")
-                            getAllPackages = True
-                            finish = True
-                        
-                        contador_package += 1
+                            if actual_package == qtde_packages:
+                                print("\nEnviou todos. Finalizando comunicação!")
+                                getAllPackages = True
+                                finish = True
+                            
+                            contador_package += 1
 
-                    print("Recebi o pacote {}. Vou enviar a confirmação para o Client\n".format(actual_package))
-                    com.sendData(send_something(4, contador_package, 1))
-                    time.sleep(0.1)
+                    if bla == False:
+                        print("Recebi o pacote {}. Vou enviar a confirmação para o Client\n".format(actual_package))
+                        com.sendData(send_something(4, contador_package, 1))
+                        time.sleep(0.1)
+                    else:
+                        com.sendData(send_something(4, contador_package, 0))
+                        time.sleep(0.1)
 
                 else:
                     print(tamanho_payload/114)
                     print("Deu erro nos pacotes. Esse não era o próximo. Por favor, mandar de novo o {}". format((tamanho_payload/114)+1))
-                    print(send_something(4, (tamanho_payload/114)+1, 0))
+                    print(send_something(4, int((tamanho_payload/114)+1), 0))
                     com.sendData(send_something(4, (tamanho_payload/114)+1, 0))
                     time.sleep(0.1)
 
