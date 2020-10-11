@@ -19,7 +19,7 @@ from functions import (
 from enlace import *
 import time
 import logging
-logging.basicConfig(filename='Server1.txt', level=logging.DEBUG, format='%(asctime)s %(message)s')
+logging.basicConfig(filename='Server2.txt', level=logging.DEBUG, format='%(asctime)s %(message)s')
 
 sizeHeader   = 10
 sizePayload  = 114
@@ -127,7 +127,6 @@ def main():
                 print("O pacote está errado, vou pedir para reenviar")
                 actualPayloadSize = transformBytesToInt(headerPackages[5:6])
                 payloadMessage    = com.rx.getNData(actualPayloadSize)
-                print(payloadMessage)
                 eopMessage        = com.rx.getNData(sizeEOP)
                 header = headerConfirmation(6, count, actualPackage)
                 com.sendData(header + endOP)

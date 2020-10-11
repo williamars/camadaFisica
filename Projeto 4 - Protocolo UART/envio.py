@@ -21,10 +21,10 @@ from enlace import *
 import time
 import random
 import logging
-logging.basicConfig(filename='Client1.txt', level=logging.DEBUG, format='%(asctime)s %(message)s')
-# import os
-# from tkinter import Tk
-# from tkinter.filedialog import askopenfilename
+logging.basicConfig(filename='Client2.txt', level=logging.DEBUG, format='%(asctime)s %(message)s')
+import os
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 
 # python -m serial.tools.list_ports
 serialName   = "COM3"
@@ -50,15 +50,16 @@ def main():
         com.enable()
         print("Comunicação de  Envio  aberta!\n")
         
-        # Tk().withdraw()
-        # image = askopenfilename() 
+        Tk().withdraw()
+        image = askopenfilename() 
         print("Transformando imagem em bytes")
         
-        image        = './img/teste1.png'
+        # image        = './img/teste2.png'
         txBuffer     =  open(image, 'rb').read()
         sizeTxBuffer = len(txBuffer)
         
         print("O arquivo a ser enviado possui {} bytes\n".format(sizeTxBuffer))
+        logging.info("A transmissão é de um arquivo de {} bytes".format(sizeTxBuffer))
 
         totalOfPackages, lastPayloadSize = numberOfPackages(sizeTxBuffer)
 
@@ -72,7 +73,7 @@ def main():
             logging.debug("/ envio / 1 / 14")
         
             headerAnswer  = com.rx.getNData(sizeHeader)
-            contador = 0
+            contador = 1    
             while headerAnswer == b'\x00' and contador <= 4:
                 print("Enviando o Handshake pela vez {}". format(contador))
                 com.sendData(headerHandshake + endOP)
@@ -120,6 +121,8 @@ def main():
 
                 contadorTempo = 1
                 while headerConfirmation == b'\x00' and contadorTempo <= 4:
+                    print("Perdi comunicação. Tentando reestabelecer")
+                    logging.debug("/ envio / 3 / {0} / {1} / {2}". format(lastPayloadSize+14, count, sizeTxBuffer))
                     headerConfirmation = com.rx.getNData(sizeHeader)
                     contadorTempo += 1
                 
@@ -134,7 +137,7 @@ def main():
                 if type_ == 4:
                     print("Enviou certo\n")
                     logging.debug("/ receb / 4 / 14")
-                    count += 1
+                    count = 1
                     index_data += sizePayload
                 elif type_ == 6:
                     print("Deu erro nos pacotes")
