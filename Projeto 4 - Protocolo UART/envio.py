@@ -54,7 +54,7 @@ def main():
         # image = askopenfilename() 
         print("Transformando imagem em bytes")
         
-        image        = './img/teste2.png'
+        image        = './img/teste1.png'
         txBuffer     =  open(image, 'rb').read()
         sizeTxBuffer = len(txBuffer)
         
@@ -104,11 +104,12 @@ def main():
 
         count      = 1
         index_data = 0
-        print("Vou começar a transmissão dos pacotes")
+        print("Vou começar a transmissão dos pacotes\n")
         while CanClientInit:
             if count < totalOfPackages:
                 print("Enviando o pacote {}". format(count))
                 header  = headerPackages(3, totalOfPackages, count, sizePayload)
+                index_data = (count-1)*sizePayload
                 payload = txBuffer[index_data:index_data+sizePayload]
                 com.sendData(header + payload + endOP)
                 time.sleep(0.1)
@@ -127,24 +128,26 @@ def main():
                     endingBecauseOfTime(com)
 
 
-                eopConfirmation    = com.rx.getNData(sizeEOP)
+                eopConfirmation = com.rx.getNData(sizeEOP)
                 type_ = transformBytesToInt(headerConfirmation[0:1])
 
                 if type_ == 4:
-                    print("Ok")
+                    print("Enviou certo\n")
                     logging.debug("/ receb / 4 / 14")
                     count += 1
                     index_data += sizePayload
                 elif type_ == 6:
                     print("Deu erro nos pacotes")
                     logging.debug("/ receb / 6 / 14")
-                    lastReceived = headerConfirmation[7:8]
+                    lastReceived = transformBytesToInt(headerConfirmation[7:8])
+                    print("Último recebido: ", lastReceived)
                     count = lastReceived + 1
 
 
             elif count == totalOfPackages:
                 print("Enviando o último pacote")
                 header  = headerPackages(3, totalOfPackages, count, lastPayloadSize)
+                index_data = (count-1)*sizePayload
                 payload = txBuffer[index_data:index_data+lastPayloadSize]
                 com.sendData(header + payload + endOP)
                 time.sleep(0.1)
@@ -156,26 +159,25 @@ def main():
                 type_ = transformBytesToInt(headerConfirmation[0:1])
                 
                 if type_ == 4:
-                    print("Deu certo no último")
+                    print("Deu certo no último\n")
                     logging.debug("/ receb / 4 / 14")
                     count += 1
                 elif type_ == 6:
-                    print("Deu erro no último")
+                    print("Deu erro no último\n")
                     logging.debug("/ receb / 6 / 14")
-                    lastReceived = headerConfirmation[7:8]
+                    lastReceived = transformBytesToInt(headerConfirmation[7:8])
                     count = lastReceived + 1
 
             else:
                 CanClientInit = False
                 print("SUCESSO!")
 
-        print("Sucesso!")
-
     
         # Encerra comunicação
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
+        # print(txBuffer)
         com.disable()
     except Exception as ex:
         print("[ERROR CLIENT]: \n", ex)

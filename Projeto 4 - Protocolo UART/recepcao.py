@@ -93,14 +93,18 @@ def main():
 
             contadorTempo = 1
             while headerPackages == b'\x00' and contadorTempo <= 4:
-                print("Comunicação foi cortada. Tentando pegar novamente")
+                print("\nComunicação foi cortada. Tentando pegar novamente")
                 headerPackages = com.rx.getNData(sizeHeader)
+
+                header = headerConfirmation(6, count, count-1)
+                com.sendData(header + endOP)
+                logging.debug("/ envio / 6 / 14")
+
                 contadorTempo += 1
 
             if contadorTempo == 5:
                 print("O tempo acabou. Comunicação encerrada")
                 endingBecauseOfTime(com)
-
 
             actualPackage     = transformBytesToInt(headerPackages[4:5])
             if actualPackage == count:
@@ -113,7 +117,7 @@ def main():
                 time.sleep(0.1)
                 txBuffer += payloadMessage
 
-                print("Enviando confirmação")
+                print("Enviando confirmação\n")
                 header = headerConfirmation(4, 0, count)
                 com.sendData(header + endOP)
                 logging.debug("/ envio / 4 / 14")
@@ -121,10 +125,15 @@ def main():
                 count += 1
             else:
                 print("O pacote está errado, vou pedir para reenviar")
-                header = headerConfirmation(4, count, actualPackage)
+                actualPayloadSize = transformBytesToInt(headerPackages[5:6])
+                payloadMessage    = com.rx.getNData(actualPayloadSize)
+                print(payloadMessage)
+                eopMessage        = com.rx.getNData(sizeEOP)
+                header = headerConfirmation(6, count, actualPackage)
                 com.sendData(header + endOP)
                 logging.debug("/ envio / 6 / 14")
         
+        print("Tudo pronto! Arquivo pegado!")
 
         print("-"*30)
         print ("Salvando dados no arquivo:")
@@ -139,6 +148,7 @@ def main():
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
+        # print(txBuffer)
         com.disable()
 
     except Exception as ex:
