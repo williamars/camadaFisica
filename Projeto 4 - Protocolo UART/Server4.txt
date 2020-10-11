@@ -1,0 +1,7 @@
+2020-10-11 15:02:03,391 / receb / 1 / 14
+2020-10-11 15:02:04,402 / envio / 2 / 14
+2020-10-11 15:02:05,438 / receb / 3 / 128
+2020-10-11 15:02:05,572 / envio / 4 / 14
+2020-10-11 15:02:05,991 / receb / 3 / 128
+
+Após isso, quebrei o programa, que não enviou mais resposta ao client.

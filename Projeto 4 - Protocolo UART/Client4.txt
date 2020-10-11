@@ -1,0 +1,21 @@
+2020-10-11 15:02:03,222 A transmissão é de um arquivo de 259 bytes
+
+Handshake:
+2020-10-11 15:02:03,257 / envio / 1 / 14
+2020-10-11 15:02:04,562 / receb / 2 / 14
+
+Transmissão
+2020-10-11 15:02:04,719 / envio / 3 / 128 / 1 / 259
+2020-10-11 15:02:05,687 / receb / 4 / 14
+
+Aqui, ele envia e espera a confirmação, a qual não recebe e, por isso,
+continua enviando, até dar 20 segundos
+2020-10-11 15:02:05,799 / envio / 3 / 128 / 2 / 259
+2020-10-11 15:02:10,833 / envio / 3 / 45 / 2 / 259
+2020-10-11 15:02:15,853 / envio / 3 / 45 / 2 / 259
+2020-10-11 15:02:20,888 / envio / 3 / 45 / 2 / 259
+2020-10-11 15:02:25,946 / envio / 3 / 45 / 2 / 259
+
+Mensagem avisando que se desconecta (tipo 5)
+2020-10-11 15:02:30,994 / envio / 5 / 14
+2020-10-11 15:02:30,994 Tempo finalizado

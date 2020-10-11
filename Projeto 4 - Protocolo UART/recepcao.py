@@ -19,7 +19,7 @@ from functions import (
 from enlace import *
 import time
 import logging
-logging.basicConfig(filename='Server2.txt', level=logging.DEBUG, format='%(asctime)s %(message)s')
+logging.basicConfig(filename='Server5.txt', level=logging.DEBUG, format='%(asctime)s %(message)s')
 
 sizeHeader   = 10
 sizePayload  = 114
@@ -128,6 +128,7 @@ def main():
                 actualPayloadSize = transformBytesToInt(headerPackages[5:6])
                 payloadMessage    = com.rx.getNData(actualPayloadSize)
                 eopMessage        = com.rx.getNData(sizeEOP)
+                logging.debug("/ receb / 3 / 14")
                 header = headerConfirmation(6, count, actualPackage)
                 com.sendData(header + endOP)
                 logging.debug("/ envio / 6 / 14")

@@ -1,0 +1,19 @@
+2020-10-11 14:52:06,370 A transmissão é de um arquivo de 259 bytes
+
+Envio do Handshake
+2020-10-11 14:52:06,404 / envio / 1 / 14
+2020-10-11 14:52:11,622 / envio / 1 / 14
+
+Após duas tentativas sem resposta, envia mais uma:
+2020-10-11 14:52:16,876 / envio / 1 / 14
+
+Recebeu resposta
+2020-10-11 14:52:17,856 / receb / 2 / 14
+
+Transmissão dos arquivos
+2020-10-11 14:52:17,997 / envio / 3 / 128 / 1 / 259
+2020-10-11 14:52:19,113 / receb / 4 / 14
+2020-10-11 14:52:19,225 / envio / 3 / 128 / 2 / 259
+2020-10-11 14:52:19,821 / receb / 4 / 14
+2020-10-11 14:52:19,933 / envio / 3 / 45 / 3 / 259
+2020-10-11 14:52:20,344 / receb / 4 / 14

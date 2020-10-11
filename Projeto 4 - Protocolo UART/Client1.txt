@@ -1,6 +1,10 @@
-2020-10-11 14:38:28,277 A transmissão é de um arquivo de 1916 bytes
+2020-10-11 14:38:28,277 A transmissão é de um arquivo de 1916 bytes (17 pacotes)
+
+Handshake:
 2020-10-11 14:38:28,316 / envio / 1 / 14
 2020-10-11 14:38:29,720 / receb / 2 / 14
+
+Transmissão dos pacotes (/ açao / tipo msg / pacote / total bytes)
 2020-10-11 14:38:29,874 / envio / 3 / 128 / 1 / 1916
 2020-10-11 14:38:30,956 / receb / 4 / 14
 2020-10-11 14:38:31,071 / envio / 3 / 128 / 2 / 1916

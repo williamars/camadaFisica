@@ -21,7 +21,7 @@ from enlace import *
 import time
 import random
 import logging
-logging.basicConfig(filename='Client2.txt', level=logging.DEBUG, format='%(asctime)s %(message)s')
+logging.basicConfig(filename='Client5.txt', level=logging.DEBUG, format='%(asctime)s %(message)s')
 import os
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
@@ -137,7 +137,7 @@ def main():
                 if type_ == 4:
                     print("Enviou certo\n")
                     logging.debug("/ receb / 4 / 14")
-                    count = 1
+                    count += 1
                     index_data += sizePayload
                 elif type_ == 6:
                     print("Deu erro nos pacotes")

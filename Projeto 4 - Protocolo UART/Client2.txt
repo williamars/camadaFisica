@@ -1,9 +1,16 @@
 2020-10-11 14:40:59,313 A transmissão é de um arquivo de 213 bytes
+
+Handshake:
 2020-10-11 14:40:59,372 / envio / 1 / 14
 2020-10-11 14:41:01,620 / receb / 2 / 14
+
+Transmissão:
 2020-10-11 14:41:01,782 / envio / 3 / 128 / 1 / 213
 2020-10-11 14:41:02,871 / receb / 4 / 14
+
+Enviou o mesmo pacote que anteriormente
 2020-10-11 14:41:02,983 / envio / 3 / 128 / 1 / 213
+Recebe mensagem de erro e envia o correto:
 2020-10-11 14:41:03,425 / receb / 6 / 14
 2020-10-11 14:41:03,566 / envio / 3 / 113 / 2 / 213
 2020-10-11 14:41:04,076 / receb / 4 / 14
