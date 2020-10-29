@@ -39,6 +39,7 @@ def main():
 
         number = int(input("Digite o número de transmissão: "))
         f1, f2 = mySignal.sayTheFrequency(number)
+        print("As frequências a enviar: {} e {}". format(f1, f2))
 
         # Gerando os sinais
         x, sin1 = mySignal.generateSin(f1, A, T, fs)
@@ -51,17 +52,10 @@ def main():
         sound = sd.playrec(sin, fs)
         sd.wait()
         audio_captado = sound[:, 0]
+        print("Áudio tocado e recebido")
 
-        # Plotando o gráfico temporal
-        # plt.figure()
-        # plt.plot(audio_captado)
-        # plt.show()
-
-        # Plotando o Fourier
+        # Fourier
         X, Y = mySignal.calcFFT(audio_captado, fs)
-        # plt.figure()
-        # plt.plot(X, np.abs(Y))
-        # plt.show()
 
         # Pegando as frequências de maior influência
         thres = 0.3
@@ -88,6 +82,25 @@ def main():
         number_received = mySignal.sayTheNumber(second)
 
         print("O número dessa frequência é o: {}". format(number_received))
+
+        # Plotando o gráfico temporal do sinal tocado
+        plt.figure()
+        plt.title("Soma dos senos enviadas [Sinal Tocado]")
+        plt.plot(sin)
+        plt.xlim(0, 1000)
+        plt.show()
+
+        # Plotando o gráfico temporal do sinal recebido
+        plt.figure()
+        plt.plot(audio_captado)
+        plt.title("Sinal Ouvido")
+        plt.show()
+
+        # Plotando o Fourier do sinal recebido
+        plt.figure()
+        plt.plot(X, np.abs(Y))
+        plt.title("FFT do sinal ouvido")
+        plt.show()
 
     except Exception as ex:
         print(ex)
