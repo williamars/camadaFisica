@@ -4,12 +4,33 @@ from scipy import signal
 from scipy.fftpack import fft, fftshift
 from suaBibSignal import signalMeu
 import sounddevice as sd
-import soundfile   as sf
+import soundfile as sf
 import time
+import peakutils
 
-A  = 1.5
+A = 1.5
 fs = 44100
-T  = 10
+T = 3
+t = np.linspace(-T/2, T/2, T*fs)
+
+sd.default.samplerate = fs
+sd.default.channels = 1
+
+frequencies_1 = [697, 770, 852, 941]
+frequencies_2 = [1209, 1336, 1477, 1633]
+
+
+def aproxima_number(frequencies, f_list, index):
+    variable = frequencies[index]
+    subtraction_min = 1000000
+    for f in f_list:
+        sub = frequencies[index] - f
+        if np.abs(sub) < subtraction_min:
+            subtraction_min = np.abs(sub)
+            variable = f
+    frequencies[index] = variable
+    return frequencies
+
 
 def main():
     try:
@@ -18,7 +39,7 @@ def main():
 
         number = int(input("Digite o número de transmissão: "))
         f1, f2 = mySignal.sayTheFrequency(number)
-    
+
         # Gerando os sinais
         x, sin1 = mySignal.generateSin(f1, A, T, fs)
         x, sin2 = mySignal.generateSin(f2, A, T, fs)
@@ -26,18 +47,51 @@ def main():
         # Somando as senoides
         sin = sin1 + sin2
 
-        # Esperando 2 segundos para tocar...
-        time.sleep(2)
-        sd.play(sin, fs)
+        # Tocando o som
+        sound = sd.playrec(sin, fs)
+        sd.wait()
+        audio_captado = sound[:, 0]
 
         # Plotando o gráfico temporal
-        plt.figure()
-        plt.plot(sin, '.-')
-        plt.xlim(0, 1000)
-        plt.show()
+        # plt.figure()
+        # plt.plot(audio_captado)
+        # plt.show()
+
+        # Plotando o Fourier
+        X, Y = mySignal.calcFFT(audio_captado, fs)
+        # plt.figure()
+        # plt.plot(X, np.abs(Y))
+        # plt.show()
+
+        # Pegando as frequências de maior influência
+        thres = 0.3
+        index = peakutils.indexes(np.abs(Y), thres=thres, min_dist=20)
+        if len(index != 2):
+            while len(index) > 2:
+                thres += 0.005
+                index = peakutils.indexes(np.abs(Y), thres=thres, min_dist=50)
+            while len(index) < 2:
+                thres -= 0.005
+                index = peakutils.indexes(np.abs(Y), thres=thres, min_dist=50)
+        frequencies = list()
+        for freq in X[index]:
+            if freq > 0:
+                frequencies.append(freq)
+        print("As maiores frequências são: {}".format(frequencies))
+
+        # Aproxima o número para a frequência mais próxima
+        change_first = aproxima_number(frequencies, frequencies_1, index=0)
+        second = aproxima_number(change_first, frequencies_2, index=1)
+        print("\nAproximando, temos as frequências: {}". format(second))
+
+        # Descobre qual era o número
+        number_received = mySignal.sayTheNumber(second)
+
+        print("O número dessa frequência é o: {}". format(number_received))
 
     except Exception as ex:
         print(ex)
-    
+
+
 if __name__ == "__main__":
     main()

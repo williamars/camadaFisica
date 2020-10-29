@@ -6,7 +6,6 @@ from scipy.fftpack import fft
 from scipy import signal as window
 
 
-
 class signalMeu:
     def __init__(self):
         self.init = 0
@@ -22,15 +21,15 @@ class signalMeu:
 
     def calcFFT(self, signal, fs):
         # https://docs.scipy.org/doc/scipy/reference/tutorial/fftpack.html
-        N  = len(signal)
+        N = len(signal)
         W = window.hamming(N)
-        T  = 1/fs
+        T = 1/fs
         xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
         yf = fft(signal*W)
         return(xf, np.abs(yf[0:N//2]))
 
     def plotFFT(self, signal, fs):
-        x,y = self.calcFFT(signal, fs)
+        x, y = self.calcFFT(signal, fs)
         plt.figure()
         plt.plot(x, np.abs(y))
         plt.title('Fourier')
@@ -57,7 +56,7 @@ class signalMeu:
         elif number == 0:
             f = [941, 1336]
         return f
-        
+
     def sayTheNumber(self, list_):
         if list_ == [697, 1209]:
             number = 1
@@ -80,4 +79,3 @@ class signalMeu:
         elif list_ == [941, 1336]:
             number = 0
         return number
-        

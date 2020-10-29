@@ -20,39 +20,47 @@ def main():
         answer = input("Posso começar a ouvir? S/N: ")
 
         if answer == "S" or answer == "s":
-            duration = 4
-            myRecording = sd.rec(int(duration * fs), samplerate=fs, channels=2)
+            duration = 3
+            myRecording = sd.rec(int(duration * fs), samplerate=fs, channels=1)
             sd.wait()
 
         else:
             exit()
 
-        print("Plotando o som real")
-        plt.plot(myRecording)
-        # plt.show()
-
         yAudio = myRecording[:, 0]
+
+        print("Plotando o som real")
+        plt.figure()
+        plt.plot(yAudio)
+        plt.show()
 
         print("Plotando o Fourier")
         X, Y = mySignal.calcFFT(yAudio, fs)
 
+        plt.figure()
         plt.plot(X, np.abs(Y))
-        # plt.show()
+        plt.show()
 
-        index = peakutils.indexes(np.abs(Y), thres=0.7, min_dist=50)
-        print("index de picos {}" .format(index))
+        thres = 0.87
+        index = peakutils.indexes(np.abs(Y), thres=thres, min_dist=50)
+        if len(index != 2):
+            while len(index) > 2:
+                thres += 0.005
+                index = peakutils.indexes(np.abs(Y), thres=thres, min_dist=50)
+            while len(index) < 2:
+                thres -= 0.005
+                index = peakutils.indexes(np.abs(Y), thres=thres, min_dist=50)
         list_ = list()
         for freq in X[index]:
             if freq > 0:
                 list_.append(freq)
 
-        new = [0]*2
-        new[0] = list_[0]
-        new[1] = list_[1]
+        print("Frequências: ", list_)
 
-        subtract = 0
-        for i in f1:
-            result = f1 - new[0]
+        # subtract = 0
+        # for i in list_:
+        # for i in f1:
+        #     result = f1 -
 
     except Exception as ex:
         print(ex)
