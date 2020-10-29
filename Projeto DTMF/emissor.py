@@ -71,7 +71,7 @@ def main():
         for freq in X[index]:
             if freq > 0:
                 frequencies.append(freq)
-        print("As maiores frequências são: {}".format(frequencies))
+        print("As frequências que mais aparecem são: {}".format(frequencies))
 
         # Aproxima o número para a frequência mais próxima
         change_first = aproxima_number(frequencies, frequencies_1, index=0)
@@ -88,18 +88,21 @@ def main():
         plt.title("Soma dos senos enviadas [Sinal Tocado]")
         plt.plot(sin)
         plt.xlim(0, 1000)
+        plt.savefig('somaDosSenos.png', format='png')
         plt.show()
 
         # Plotando o gráfico temporal do sinal recebido
         plt.figure()
         plt.plot(audio_captado)
         plt.title("Sinal Ouvido")
+        plt.savefig('signalReceived.png', format='png')
         plt.show()
 
         # Plotando o Fourier do sinal recebido
         plt.figure()
         plt.plot(X, np.abs(Y))
         plt.title("FFT do sinal ouvido")
+        plt.savefig('FFTReceived.png', format='png')
         plt.show()
 
     except Exception as ex:
